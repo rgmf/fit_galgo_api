@@ -12,25 +12,33 @@ services:
     volumes:
       - ./app:/app/app
       - ./tests:/app/tests
+    environment:
+      - MONGO_HOST=fit_galgo_mongodb
+    depends_on:
+      - fit_galgo_mongodb
 
-  fit_galgo_couchbase_node1:
-    image: couchbase:7.2.2
-    volumes:
-      - "./couchbase/node1:/opt/couchbase/var"
-  fit_galgo_couchbase_node2:
-    image: couchbase:7.2.2
-    volumes:
-      - "./couchbase/node2:/opt/couchbase/var"
-  fit_galgo_couchbase_node3:
-    image: couchbase:7.2.2
-    volumes:
-      - "./couchbase/node3:/opt/couchbase/var"
+  fit_galgo_mongodb:
+    image: mongo:latest
     ports:
-      - "8091:8191"
+      - "27117:27017"
+    networks:
+      - fit_galgo_network
+    volumes:
+      - mongodb_data:/data/db
+
+  fit_galgo_mongodb_test:
+    image: mongo:latest
+    ports:
+      - "27217:27017"
+    networks:
+      - fit_galgo_network
+    volumes:
+      - mongodb_test_data:/data/db
 
 networks:
   fit_galgo_network:
     driver: bridge
 
 volumes:
-  couchbase:
+  mongodb_data:
+  mongodb_test_data:

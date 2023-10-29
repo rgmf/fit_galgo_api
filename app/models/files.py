@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class FileUploadInfo(BaseModel):
-    file_path: list[str]
+    file_path: str
     accepted: bool
     id: str | None = None
     errors: list[str] = []

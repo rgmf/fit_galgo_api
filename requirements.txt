@@ -1,7 +1,9 @@
 git+https://github.com/rgmf/fit_galgo.git@v0.2.0
-couchbase==4.1.8
-fastapi==0.104.0
-pydantic==2.4.2
-pytest==7.4.2
-python-multipart==0.0.6
-uvicorn==0.23.2
+fastapi~=0.104.0
+pymongo~=4.5.0
+pydantic~=2.4.2
+pydantic_settings~=2.0.3
+pytest~=7.4.2
+python-multipart~=0.0.6
+uvicorn~=0.23.2
+python_dotenv~=1.0.0
