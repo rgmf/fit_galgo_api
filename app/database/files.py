@@ -23,10 +23,8 @@ class FilesManager(DbManager):
         model_dict["_id"] = self.generate_id(model.file_id)
         jsonable_model = jsonable_encoder(model_dict)
         try:
-            id: ObjectId = self._client.files.insert_one(jsonable_model).inserted_id
+            collection = self._client[self.get_collection_name(model.file_id)]
+            id: ObjectId = collection.insert_one(jsonable_model).inserted_id
         except DuplicateKeyError:
             return None
         return str(id)
-
-    def drop(self) -> None:
-        self._client.drop_collection("files")
