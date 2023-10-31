@@ -2,7 +2,7 @@ import pytest
 
 from app.config import Settings
 from app.database.files import FilesManager
-from app.database.database import COLLECTION_NAME
+from app.database.files import COLLECTION_NAME
 
 
 def get_settings_override() -> Settings:

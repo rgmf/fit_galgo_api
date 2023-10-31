@@ -1,3 +1,15 @@
+# Rebuild docker container
+For instance, if you change dependencies in `fit_galgo_api` then you have tu run these commands to re-build the container:
+
+```shell
+$ docker -compose up -d --build fit_galgo_api
+
+$ docker compose stop fit_galgo_api
+$ docker compose rm -f fit_galgo_api
+
+$ docker compose up -d fit_galgo_api
+```
+
 # Run tests
 `docker compose exec fit_galgo_api pytest`
 

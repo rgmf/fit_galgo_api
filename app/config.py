@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,10 +13,6 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
 
 
-# # Database configuration
-# MONGODB_HOST = "fit_galgo_mongodb"
-# MONGODB_PORT = 27017
-
-# # Folder for uploading files
-# UPLOAD_FILES_FOLDER = "files"
-# UPLOAD_FIT_FILES_FOLDER = os.path.join(UPLOAD_FILES_FOLDER, "fit")
+@lru_cache
+def get_settings():
+    return Settings()

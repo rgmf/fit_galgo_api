@@ -10,9 +10,14 @@ from fit_galgo.fit.models import FitModel
 from app.models.files import FileUploadInfo, FilesUploadTask
 from app.database.files import FilesManager
 from app.config import Settings
+from app.database.models.users import User
 
 
-async def send_task_files(files: list[UploadFile], settings: Settings) -> FilesUploadTask:
+async def send_task_files(
+        files: list[UploadFile],
+        user: User,
+        settings: Settings
+) -> FilesUploadTask:
     fit_files_folder: str = os.path.join(
         settings.upload_fit_files_folder,
         datetime.now().date().strftime("%Y%m%d")
@@ -40,7 +45,7 @@ async def send_task_files(files: list[UploadFile], settings: Settings) -> FilesU
             galgo: FitGalgo = FitGalgo(fit_file_path)
             model: FitModel = galgo.parse()
 
-            id: str | None = FilesManager(settings).insert(model)
+            id: str | None = FilesManager(settings, user).insert(model)
             if not id:
                 fui: FileUploadInfo = FileUploadInfo(
                     file_path=file.filename,
