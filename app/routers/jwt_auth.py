@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.database.users import UserManager
 from app.auth.auth import Token, create_access_token, verify_password
-from app.database.models.users import User, UserDb
+from app.database.models import User, UserDb
 from app.config import Settings, get_settings
 
 router = APIRouter(

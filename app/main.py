@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 
-from app.routers import files, jwt_auth
+from app.routers import jwt_auth, users, files, activities
 
 app = FastAPI()
 app.include_router(jwt_auth.router)
+app.include_router(users.router)
 app.include_router(files.router)
+app.include_router(activities.router)
 
 
 @app.get("/")

@@ -41,7 +41,7 @@ def test_insert_activity(db_manager: FilesManager):
     assert isinstance(id, str)
 
     time_created_str: str = time_created.strftime("%Y%m%d%H%M%S")
-    assert id == f"activity_{time_created_str}"
+    assert id == f"alice_activity_{time_created_str}"
 
     assert len(list(db_manager.get("activity"))) == 1
 
@@ -67,7 +67,7 @@ def test_insert_monitoring(db_manager: FilesManager):
         assert isinstance(id, str)
 
         time_created_str: str = time_created.strftime("%Y%m%d%H%M%S")
-        assert id == f"{type_}_{time_created_str}"
+        assert id == f"alice_{type_}_{time_created_str}"
 
     assert len(list(db_manager.get("monitoring"))) == len(all_subtypes)
 
@@ -94,7 +94,7 @@ def test_insert_hrv(db_manager: FilesManager):
         id: str = db_manager.insert(hrv)
         if id is not None:
             time_created_str: str = time_created.strftime("%Y%m%d%H%M%S")
-            assert id == f"{type_}_{time_created_str}"
+            assert id == f"alice_{type_}_{time_created_str}"
 
     assert len(list(db_manager.get("hrv"))) == 1
 
@@ -120,6 +120,6 @@ def test_insert_sleep(db_manager: FilesManager):
         id: str = db_manager.insert(sleep)
         if id is not None:
             time_created_str: str = time_created.strftime("%Y%m%d%H%M%S")
-            assert id == f"{type_}_{time_created_str}"
+            assert id == f"alice_{type_}_{time_created_str}"
 
     assert len(list(db_manager.get("sleep"))) == 1

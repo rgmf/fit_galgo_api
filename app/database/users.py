@@ -1,7 +1,7 @@
 from bson.objectid import ObjectId
 
 from app.database.database import DbManager
-from app.database.models.users import UserIn, UserDb
+from app.database.models import UserIn, UserDb
 from app.config import Settings
 
 

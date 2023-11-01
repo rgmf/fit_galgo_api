@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 
-from app.database.models.users import User, UserDb
+from app.database.models import User, UserDb
 from app.database.users import UserManager
 from app.config import Settings, get_settings
 

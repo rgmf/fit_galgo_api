@@ -10,7 +10,7 @@ from fit_galgo.fit.models import FitModel
 from app.models.files import FileUploadInfo, FilesUploadTask
 from app.database.files import FilesManager
 from app.config import Settings
-from app.database.models.users import User
+from app.database.models import User
 
 
 async def send_task_files(

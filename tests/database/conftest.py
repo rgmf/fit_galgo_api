@@ -3,6 +3,7 @@ import pytest
 from app.config import Settings
 from app.database.files import FilesManager
 from app.database.files import COLLECTION_NAME
+from app.database.models import User
 
 
 def get_settings_override() -> Settings:
@@ -16,7 +17,8 @@ def get_settings_override() -> Settings:
 
 @pytest.fixture(scope="function")
 def db_manager() -> Settings:
-    yield FilesManager(get_settings_override())
+    user: User = User(username="alice", email="alice@alice.com")
+    yield FilesManager(get_settings_override(), user)
 
     for collection_name in set(COLLECTION_NAME.values()):
-        FilesManager(get_settings_override()).drop(collection_name)
+        FilesManager(get_settings_override(), user).drop(collection_name)

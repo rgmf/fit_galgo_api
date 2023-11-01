@@ -2,7 +2,7 @@
 For instance, if you change dependencies in `fit_galgo_api` then you have tu run these commands to re-build the container:
 
 ```shell
-$ docker -compose up -d --build fit_galgo_api
+$ docker compose up -d --build fit_galgo_api
 
 $ docker compose stop fit_galgo_api
 $ docker compose rm -f fit_galgo_api
