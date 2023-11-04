@@ -21,10 +21,10 @@ async def read_activities(
         user: Annotated[User, Depends(get_auth_user)],
         from_date: Annotated[datetime | None, Query(
             title="Initial datetime (from datetime)",
-            description="Initial UTC ISO-8601 datetime for the tasks to search")] = None,
+            description="Initial UTC ISO-8601 datetime for filtering")] = None,
         to_date: Annotated[datetime | None, Query(
             title="End datetime (to datetime)",
-            description="End UTC ISO-8601 datetime for the tasks to search")] = None
+            description="End UTC ISO-8601 datetime for filtering")] = None
 ) -> list[Activity]:
     query_builder: QueryBuilder = QueryBuilder()
     db_manager: ActivitiesManager = ActivitiesManager(settings, user)

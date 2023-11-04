@@ -1,6 +1,9 @@
 from pydantic import BaseModel
-from fit_galgo.fit.models import Activity as FitActivity
-from fit_galgo.fit.models import Monitor as FitMonitor
+from fit_galgo.fit.models import (
+    Activity as FitActivity,
+    Monitor as FitMonitor,
+    Sleep as FitSleep
+)
 
 
 class User(BaseModel):
@@ -28,4 +31,8 @@ class Activity(FitActivity):
 
 
 class Monitor(FitMonitor):
+    username: str
+
+
+class Sleep(FitSleep):
     username: str
