@@ -1,5 +1,7 @@
 from pymongo import MongoClient
 
+from app.database.query_builder import QueryBuilder
+
 
 class DbManager:
 
@@ -9,3 +11,8 @@ class DbManager:
         self._client = MongoClient(
             host=self._host, port=self._port, tz_aware=True
         ).fitgalgodb
+
+        self._query_builder: QueryBuilder | None = None
+
+    def add_query_builder(self, qb: QueryBuilder) -> None:
+        self._query_builder = qb

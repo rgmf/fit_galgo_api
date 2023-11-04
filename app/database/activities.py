@@ -1,36 +1,24 @@
-from typing import Annotated
-
-from fastapi import Depends
+from pymongo.cursor import Cursor
 
 from app.database.database import DbManager
 from app.database.models import Activity, User
-from app.database.query_builder import QueryBuilder
-from app.auth.auth import get_auth_user
-from app.config import Settings, get_settings
+from app.config import Settings
 
 
 class ActivitiesManager(DbManager):
-    def __init__(
-            self,
-            settings: Annotated[Settings, Depends(get_settings)],
-            user: Annotated[User, Depends(get_auth_user)]
-    ) -> None:
+    def __init__(self, settings: Settings, user: User) -> None:
         super().__init__(settings.mongodb_host, settings.mongodb_port)
         self._user = user
 
     def get(self) -> list[Activity]:
-        activities: list[dict] = self._client.activity.find(
-            {"username": self._user.username}
-        )
-        return [Activity(**activity) for activity in activities]
+        filter: dict[str, any] = {"username": self._user.username}
 
-    def filter(self, query: QueryBuilder) -> list[Activity]:
-        activities: list[dict] = self._client.activity.find(
-            {
-                "$and": [
-                    {"username": self._user.username},
-                    query.get_query()
-                ]
-            }
-        ).sort("session.timestamp", 1)
+        if self._query_builder and "dates_between" in self._query_builder.get_query():
+            filter["session.timestamp"] = (
+                self._query_builder.get_query()["dates_between"]
+            )
+
+        activities: Cursor = self._client.activity.find(filter).sort(
+            "session.timestamp", 1
+        )
         return [Activity(**activity) for activity in activities]

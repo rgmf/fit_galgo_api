@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from fit_galgo.fit.models import Activity as FitActivity
+from fit_galgo.fit.models import Monitor as FitMonitor
 
 
 class User(BaseModel):
@@ -23,4 +24,8 @@ class UserDb(User):
 
 
 class Activity(FitActivity):
+    username: str
+
+
+class Monitor(FitMonitor):
     username: str
