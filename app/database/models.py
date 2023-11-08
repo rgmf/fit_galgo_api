@@ -2,7 +2,8 @@ from pydantic import BaseModel
 from fit_galgo.fit.models import (
     Activity as FitActivity,
     Monitor as FitMonitor,
-    Sleep as FitSleep
+    Sleep as FitSleep,
+    Hrv as FitHrv
 )
 
 
@@ -35,4 +36,8 @@ class Monitor(FitMonitor):
 
 
 class Sleep(FitSleep):
+    username: str
+
+
+class Hrv(FitHrv):
     username: str
