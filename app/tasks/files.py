@@ -15,6 +15,7 @@ from app.database.models import User
 
 async def send_task_files(
         files: list[UploadFile],
+        zone: str | None,
         user: User,
         settings: Settings
 ) -> FilesUploadTask:
@@ -42,7 +43,7 @@ async def send_task_files(
                     file_object.write(chunk)
                     chunk: bytes = await file.read(10_000)
 
-            galgo: FitGalgo = FitGalgo(fit_file_path)
+            galgo: FitGalgo = FitGalgo(fit_file_path, zone)
             model: FitModel = galgo.parse()
 
             id: str | None = FilesManager(settings, user).insert(model)
