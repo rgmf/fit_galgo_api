@@ -3,7 +3,8 @@ from fit_galgo.fit.models import FitModel
 from pymongo.collection import Collection
 from pymongo.errors import DuplicateKeyError
 from pymongo.cursor import Cursor
-from fit_galgo.fit.models import FileId
+from fit_galgo.fit.models import FileId, DistanceActivity
+from pydantic import BaseModel
 
 from app.database.database import DbManager
 from app.config import Settings
@@ -38,16 +39,61 @@ class FilesManager(DbManager):
         :return: the new document's id inserted into MongoDb or None if
                  document already exists (duplicated key).
         """
-        model_dict: dict = model.model_dump()
-        model_dict["username"] = self._user.username
-        model_dict["_id"] = self.generate_id(model.file_id, self._user.username)
+        def is_a_distance_activity(model: FitModel) -> bool:
+            return (
+                collection_name == COLLECTION_NAME["activity"] and
+                isinstance(model, DistanceActivity)
+            )
+
         try:
+            model_dict: dict = self._prepare_model_dict(model)
             collection_name: str = self.get_collection_name(model.file_id)
             collection: Collection = self._client[collection_name]
-            id: ObjectId = collection.insert_one(model_dict).inserted_id
+
+            inserted_id: ObjectId = collection.insert_one(model_dict).inserted_id
+            if is_a_distance_activity(model):
+                self._insert_records_and_laps(model, inserted_id)
         except DuplicateKeyError:
             return None
-        return str(id)
+
+        return str(inserted_id)
+
+    def _prepare_model_dict(self, model: FitModel) -> dict:
+        model_dict = model.model_dump()
+        model_dict["username"] = self._user.username
+        model_dict["_id"] = self.generate_id(model.file_id, self._user.username)
+
+        if isinstance(model, DistanceActivity):
+            del model_dict["records"]
+            del model_dict["laps"]
+
+        return model_dict
+
+    def _insert_records_and_laps(
+            self, model: DistanceActivity, activity_id: ObjectId
+    ) -> None:
+        records_to_insert: list[dict] = self._prepare_models_to_insert(
+            model.records, activity_id
+        )
+        if records_to_insert:
+            self._client.record.insert_many(records_to_insert)
+
+        laps_to_insert: list[dict] = self._prepare_models_to_insert(
+            model.laps, activity_id
+        )
+        if laps_to_insert:
+            self._client.lap.insert_many(laps_to_insert)
+
+    def _prepare_models_to_insert(
+            self, models: list[BaseModel], activity_id: ObjectId
+    ) -> list[dict]:
+        models_to_insert: list[dict] = []
+        for model in models:
+            model_dict = model.model_dump()
+            model_dict["username"] = self._user.username
+            model_dict["activity_id"] = activity_id
+            models_to_insert.append(model_dict)
+        return models_to_insert
 
     def generate_id(self, file_id: FileId, username: str) -> str:
         type_: str = str(file_id.file_type)

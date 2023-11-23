@@ -19,6 +19,6 @@ class MonitorManager(DbManager):
         if self._query_builder and "dates_between" in self._query_builder.get_query():
             filter["datetime_utc"] = self._query_builder.get_query()["dates_between"]
 
-        monitor: Cursor = self._client.monitoring.find(filter)
+        monitor: Cursor = self._client.monitoring.find(filter).sort("datetime_utc", 1)
 
         return [Monitor(**m) for m in monitor]

@@ -1,4 +1,7 @@
-from pydantic import BaseModel
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+from pydantic import BaseModel, computed_field
 from fit_galgo.fit.models import (
     Activity as FitActivity,
     Monitor as FitMonitor,
@@ -31,8 +34,19 @@ class Activity(FitActivity):
     username: str
 
 
-class Monitor(FitMonitor):
+class Monitor(BaseModel):
     username: str
+    datetime_utc: datetime
+    zone_info: str
+    total_steps: int
+    total_distance: float
+    total_calories: int
+
+    @computed_field
+    @property
+    def datetime_local(self) -> datetime:
+        tz: ZoneInfo | None = ZoneInfo(self.zone_info) if self.zone_info else None
+        return self.datetime_utc.astimezone(tz)
 
 
 class Sleep(FitSleep):

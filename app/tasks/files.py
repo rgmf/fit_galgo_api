@@ -5,7 +5,7 @@ from pathlib import Path
 
 from fastapi import UploadFile
 from fit_galgo.galgo import FitGalgo
-from fit_galgo.fit.models import FitModel
+from fit_galgo.fit.models import FitModel, FitError
 
 from app.models.files import FileUploadInfo, FilesUploadTask
 from app.database.files import FilesManager
@@ -44,25 +44,33 @@ async def send_task_files(
                     chunk: bytes = await file.read(10_000)
 
             galgo: FitGalgo = FitGalgo(fit_file_path, zone)
-            model: FitModel = galgo.parse()
-
-            id: str | None = FilesManager(settings, user).insert(model)
-            if not id:
+            model: FitModel | FitError = galgo.parse()
+            if isinstance(model, FitError):
                 fui: FileUploadInfo = FileUploadInfo(
                     file_path=file.filename,
                     accepted=False,
-                    id=id,
-                    errors=["The document already exists"],
+                    id=None,
+                    errors=[str(e) for e in model.errors],
                     zip_file_path=None
                 )
             else:
-                fui: FileUploadInfo = FileUploadInfo(
-                    file_path=file.filename,
-                    accepted=True,
-                    id=id,
-                    errors=[],
-                    zip_file_path=None
-                )
+                id: str | None = FilesManager(settings, user).insert(model)
+                if not id:
+                    fui: FileUploadInfo = FileUploadInfo(
+                        file_path=file.filename,
+                        accepted=False,
+                        id=id,
+                        errors=["The document already exists"],
+                        zip_file_path=None
+                    )
+                else:
+                    fui: FileUploadInfo = FileUploadInfo(
+                        file_path=file.filename,
+                        accepted=True,
+                        id=id,
+                        errors=[],
+                        zip_file_path=None
+                    )
         fut.files_info.append(fui)
 
     return fut
