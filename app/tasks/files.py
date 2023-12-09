@@ -24,7 +24,7 @@ async def send_task_files(
         datetime.now().date().strftime("%Y%m%d")
     )
     Path(fit_files_folder).mkdir(parents=True, exist_ok=True)
-    fut: FilesUploadTask = FilesUploadTask(files_info=[])
+    fut: FilesUploadTask = FilesUploadTask(data=[])
 
     for file in files:
         fit_file_path: str = os.path.join(fit_files_folder, file.filename)
@@ -71,7 +71,7 @@ async def send_task_files(
                         errors=[],
                         zip_file_path=None
                     )
-        fut.files_info.append(fui)
+        fut.data.append(fui)
 
     return fut
 

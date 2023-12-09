@@ -6,7 +6,7 @@ from fastapi import APIRouter, status, Depends, Query
 from app.database.monitor import MonitorManager
 from app.database.sleep import SleepManager
 from app.database.hrv import HrvManager
-from app.database.models import Monitor, Sleep, Hrv, User
+from app.database.models import MonitorOut, SleepOut, HrvOut, User
 from app.database.query_builder import QueryBuilder
 from app.config import Settings, get_settings
 from app.auth.auth import get_auth_user
@@ -17,7 +17,7 @@ router = APIRouter(
 )
 
 
-@router.get("/steps", response_model=list[Monitor], status_code=status.HTTP_200_OK)
+@router.get("/steps", response_model=MonitorOut, status_code=status.HTTP_200_OK)
 async def read_steps(
         settings: Annotated[Settings, Depends(get_settings)],
         user: Annotated[User, Depends(get_auth_user)],
@@ -27,7 +27,7 @@ async def read_steps(
         to_date: Annotated[datetime | None, Query(
             title="End datetime (to datetime)",
             description="End UTC ISO-8601 datetime for filtering")] = None
-) -> list[Monitor]:
+) -> MonitorOut:
     query_builder: QueryBuilder = QueryBuilder()
     db_manager: MonitorManager = MonitorManager(settings, user)
 
@@ -38,10 +38,10 @@ async def read_steps(
 
     db_manager.add_query_builder(query_builder)
 
-    return db_manager.get_monitor_with_steps()
+    return MonitorOut(data=db_manager.get_monitor_with_steps())
 
 
-@router.get("/sleep", response_model=list[Sleep], status_code=status.HTTP_200_OK)
+@router.get("/sleep", response_model=SleepOut, status_code=status.HTTP_200_OK)
 async def read_sleep(
         settings: Annotated[Settings, Depends(get_settings)],
         user: Annotated[User, Depends(get_auth_user)],
@@ -51,7 +51,7 @@ async def read_sleep(
         to_date: Annotated[datetime | None, Query(
             title="End datetime (to datetime)",
             description="End UTC ISO-8601 datetime for filtering")] = None
-) -> list[Sleep]:
+) -> SleepOut:
     query_builder: QueryBuilder = QueryBuilder()
     db_manager: SleepManager = SleepManager(settings, user)
 
@@ -62,10 +62,10 @@ async def read_sleep(
 
     db_manager.add_query_builder(query_builder)
 
-    return db_manager.get()
+    return SleepOut(data=db_manager.get())
 
 
-@router.get("/hrv", response_model=list[Hrv], status_code=status.HTTP_200_OK)
+@router.get("/hrv", response_model=HrvOut, status_code=status.HTTP_200_OK)
 async def read_hrv(
         settings: Annotated[Settings, Depends(get_settings)],
         user: Annotated[User, Depends(get_auth_user)],
@@ -75,7 +75,7 @@ async def read_hrv(
         to_date: Annotated[datetime | None, Query(
             title="End datetime (to datetime)",
             description="End UTC ISO-8601 datetime for filtering")] = None
-) -> list[Hrv]:
+) -> HrvOut:
     query_builder: QueryBuilder = QueryBuilder()
     db_manager: HrvManager = HrvManager(settings, user)
 
@@ -86,4 +86,4 @@ async def read_hrv(
 
     db_manager.add_query_builder(query_builder)
 
-    return db_manager.get()
+    return HrvOut(data=db_manager.get())

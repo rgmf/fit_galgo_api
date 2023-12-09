@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 
 class FileUploadInfo(BaseModel):
@@ -10,4 +10,9 @@ class FileUploadInfo(BaseModel):
 
 
 class FilesUploadTask(BaseModel):
-    files_info: list[FileUploadInfo]
+    data: list[FileUploadInfo]
+
+    @computed_field
+    @property
+    def count(self) -> int:
+        return len(self.data)
