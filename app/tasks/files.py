@@ -2,6 +2,7 @@ import os
 
 from datetime import datetime
 from pathlib import Path
+from zipfile import ZipFile
 
 from fastapi import UploadFile
 from fit_galgo.galgo import FitGalgo
@@ -12,6 +13,56 @@ from app.database.files import FilesManager
 from app.config import Settings
 from app.database.models import User
 
+ACCEPTED_FILES = [".fit"]
+
+
+def is_accepted_file(filename: str) -> bool:
+    return Path(filename).suffix.lower() in ACCEPTED_FILES
+
+
+def is_zip_file(filename: str) -> bool:
+    return Path(filename).suffix.lower() == ".zip"
+
+
+async def process_fit_file(
+        fit_file_path: str,
+        zone: str | None,
+        user: User,
+        settings: Settings,
+        zip_file_path: str | None = None
+) -> FileUploadInfo:
+    galgo: FitGalgo = FitGalgo(fit_file_path, zone)
+    model: FitModel | FitError = galgo.parse()
+    zip_file_path = os.path.basename(zip_file_path) if zip_file_path else None
+    if isinstance(model, FitError):
+        fui: FileUploadInfo = FileUploadInfo(
+            filename=os.path.basename(fit_file_path),
+            accepted=False,
+            id=None,
+            errors=[str(e) for e in model.errors],
+            zip_filename=zip_file_path
+        )
+    else:
+        id: str | None = FilesManager(settings, user).insert(model)
+        if not id:
+            fui: FileUploadInfo = FileUploadInfo(
+                filename=os.path.basename(fit_file_path),
+                accepted=False,
+                id=id,
+                errors=["The document already exists"],
+                zip_filename=zip_file_path
+            )
+        else:
+            fui: FileUploadInfo = FileUploadInfo(
+                filename=os.path.basename(fit_file_path),
+                accepted=True,
+                id=id,
+                errors=[],
+                zip_filename=zip_file_path
+            )
+
+    return fui
+
 
 async def send_task_files(
         files: list[UploadFile],
@@ -19,62 +70,73 @@ async def send_task_files(
         user: User,
         settings: Settings
 ) -> FilesUploadTask:
-    fit_files_folder: str = os.path.join(
-        settings.upload_fit_files_folder,
-        datetime.now().date().strftime("%Y%m%d")
-    )
-    Path(fit_files_folder).mkdir(parents=True, exist_ok=True)
     fut: FilesUploadTask = FilesUploadTask(data=[])
 
     for file in files:
-        fit_file_path: str = os.path.join(fit_files_folder, file.filename)
-        if not is_accepted_file(fit_file_path):
+        # Write the file into tmp folder
+        tmp_files_folder: str = settings.upload_tmp_files_folder
+        Path(tmp_files_folder).mkdir(parents=True, exist_ok=True)
+        tmp_file_path: str = os.path.join(tmp_files_folder, file.filename)
+
+        with open(tmp_file_path, "wb") as file_object:
+            chunk: bytes = await file.read(10_000)
+            while chunk:
+                file_object.write(chunk)
+                chunk: bytes = await file.read(10_000)
+
+        # Depends on the type of file...
+        if is_accepted_file(tmp_file_path):
+            fui: FileUploadInfo = await process_fit_file(
+                fit_file_path=tmp_file_path,
+                zone=zone,
+                user=user,
+                settings=settings
+            )
+            fut.data.append(fui)
+            # Move tmp file to the destination folder
+            dst_path: str = os.path.join(
+                settings.upload_fit_files_folder,
+                datetime.now().date().strftime("%Y%m%d")
+            )
+            Path(dst_path).mkdir(parents=True, exist_ok=True)
+            Path(tmp_file_path).rename(Path(os.path.join(dst_path, file.filename)))
+        elif is_zip_file(tmp_file_path):
+            with ZipFile(tmp_file_path) as zipfile:
+                for filename in [f for f in zipfile.namelist() if is_accepted_file(f)]:
+                    with zipfile.open(filename) as file_in_zip:
+                        tmp_fit_file_path: str = os.path.join(
+                            tmp_files_folder, file_in_zip.name
+                        )
+                        with open(tmp_fit_file_path, "wb") as fo:
+                            chunk: bytes = file_in_zip.read(10_000)
+                            while chunk:
+                                fo.write(chunk)
+                                chunk: bytes = file_in_zip.read(10_000)
+
+                        fui: FileUploadInfo = await process_fit_file(
+                            fit_file_path=tmp_fit_file_path,
+                            zip_file_path=tmp_file_path,
+                            zone=zone,
+                            user=user,
+                            settings=settings
+                        )
+                        fut.data.append(fui)
+                        Path(tmp_fit_file_path).unlink()
+            # Move tmp file to the destination folder
+            dst_path: str = os.path.join(
+                settings.upload_zip_files_folder,
+                datetime.now().date().strftime("%Y%m%d")
+            )
+            Path(dst_path).mkdir(parents=True, exist_ok=True)
+            Path(tmp_file_path).rename(Path(os.path.join(dst_path, file.filename)))
+        else:
             fui: FileUploadInfo = FileUploadInfo(
-                file_path=file.filename,
+                filename=file.filename,
                 accepted=False,
                 id=None,
                 errors=["File extension not allowed"],
-                zip_file_path=None
+                zip_filename=None
             )
-        else:
-            with open(fit_file_path, "wb") as file_object:
-                chunk: bytes = await file.read(10_000)
-                while chunk:
-                    file_object.write(chunk)
-                    chunk: bytes = await file.read(10_000)
-
-            galgo: FitGalgo = FitGalgo(fit_file_path, zone)
-            model: FitModel | FitError = galgo.parse()
-            if isinstance(model, FitError):
-                fui: FileUploadInfo = FileUploadInfo(
-                    file_path=file.filename,
-                    accepted=False,
-                    id=None,
-                    errors=[str(e) for e in model.errors],
-                    zip_file_path=None
-                )
-            else:
-                id: str | None = FilesManager(settings, user).insert(model)
-                if not id:
-                    fui: FileUploadInfo = FileUploadInfo(
-                        file_path=file.filename,
-                        accepted=False,
-                        id=id,
-                        errors=["The document already exists"],
-                        zip_file_path=None
-                    )
-                else:
-                    fui: FileUploadInfo = FileUploadInfo(
-                        file_path=file.filename,
-                        accepted=True,
-                        id=id,
-                        errors=[],
-                        zip_file_path=None
-                    )
-        fut.data.append(fui)
+            fut.data.append(fui)
 
     return fut
-
-
-def is_accepted_file(filename: str) -> bool:
-    return Path(filename).suffix.lower() in [".fit"]

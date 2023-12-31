@@ -9,6 +9,8 @@ class Settings(BaseSettings):
 
     upload_files_folder: str = "files"
     upload_fit_files_folder: str = "files/fit"
+    upload_zip_files_folder: str = "files/zip"
+    upload_tmp_files_folder: str = "files/tmp"
 
     model_config = SettingsConfigDict(env_file=".env")
 

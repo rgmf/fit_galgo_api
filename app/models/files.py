@@ -2,11 +2,11 @@ from pydantic import BaseModel, computed_field
 
 
 class FileUploadInfo(BaseModel):
-    file_path: str
+    filename: str
     accepted: bool
     id: str | None = None
     errors: list[str] = []
-    zip_file_path: str | None = None
+    zip_filename: str | None = None
 
 
 class FilesUploadTask(BaseModel):
