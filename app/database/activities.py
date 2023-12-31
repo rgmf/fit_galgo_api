@@ -1,7 +1,7 @@
 from pymongo.cursor import Cursor
 
 from app.database.database import DbManager
-from app.database.models import Activity, User
+from app.database.models import Activity, MultiActivity, User
 from app.config import Settings
 
 
@@ -21,4 +21,7 @@ class ActivitiesManager(DbManager):
         activities: Cursor = self._client.activity.find(filter).sort(
             "session.timestamp", 1
         )
-        return [Activity(**activity) for activity in activities]
+        return [
+            Activity(**activity) if "session" in activity else MultiActivity(**activity)
+            for activity in activities if "session" in activity or "sessions" in activity
+        ]

@@ -3,7 +3,7 @@ from fit_galgo.fit.models import FitModel
 from pymongo.collection import Collection
 from pymongo.errors import DuplicateKeyError
 from pymongo.cursor import Cursor
-from fit_galgo.fit.models import FileId, DistanceActivity
+from fit_galgo.fit.models import FileId, DistanceActivity, MultisportActivity
 from pydantic import BaseModel
 
 from app.database.database import DbManager
@@ -39,10 +39,10 @@ class FilesManager(DbManager):
         :return: the new document's id inserted into MongoDb or None if
                  document already exists (duplicated key).
         """
-        def is_a_distance_activity(model: FitModel) -> bool:
+        def is_an_activity_with_records_and_laps(model: FitModel) -> bool:
             return (
                 collection_name == COLLECTION_NAME["activity"] and
-                isinstance(model, DistanceActivity)
+                (isinstance(model, DistanceActivity) or isinstance(model, MultisportActivity))
             )
 
         try:
@@ -51,7 +51,7 @@ class FilesManager(DbManager):
             collection: Collection = self._client[collection_name]
 
             inserted_id: ObjectId = collection.insert_one(model_dict).inserted_id
-            if is_a_distance_activity(model):
+            if is_an_activity_with_records_and_laps(model):
                 self._insert_records_and_laps(model, inserted_id)
         except DuplicateKeyError:
             return None
@@ -63,14 +63,14 @@ class FilesManager(DbManager):
         model_dict["username"] = self._user.username
         model_dict["_id"] = self.generate_id(model.file_id, self._user.username)
 
-        if isinstance(model, DistanceActivity):
+        if isinstance(model, DistanceActivity) or isinstance(model, MultisportActivity):
             del model_dict["records"]
             del model_dict["laps"]
 
         return model_dict
 
     def _insert_records_and_laps(
-            self, model: DistanceActivity, activity_id: ObjectId
+            self, model: DistanceActivity | MultisportActivity, activity_id: ObjectId
     ) -> None:
         records_to_insert: list[dict] = self._prepare_models_to_insert(
             model.records, activity_id

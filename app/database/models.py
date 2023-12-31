@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 from pydantic import BaseModel, computed_field
 from fit_galgo.fit.models import (
     Activity as FitActivity,
+    MultiActivity as FitMultiActivity,
     Sleep as FitSleep,
     Hrv as FitHrv
 )
@@ -31,6 +32,19 @@ class UserDb(User):
 
 class Activity(FitActivity):
     username: str
+
+
+class MultiActivity(FitMultiActivity):
+    username: str
+
+
+class ActivityOut(BaseModel):
+    data: list[Activity | MultiActivity]
+
+    @computed_field
+    @property
+    def count(self) -> int:
+        return len(self.data)
 
 
 class Monitor(BaseModel):
