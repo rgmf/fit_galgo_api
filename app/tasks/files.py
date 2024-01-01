@@ -138,5 +138,6 @@ async def send_task_files(
                 zip_filename=None
             )
             fut.data.append(fui)
+            Path(tmp_file_path).unlink()
 
     return fut

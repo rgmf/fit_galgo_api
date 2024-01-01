@@ -1,5 +1,7 @@
 import pytest
 
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -45,3 +47,9 @@ def testclient() -> TestClient:
 
     FilesManager(get_settings_override(), user_in).drop("sleep")
     user_manager.drop()
+
+    s: Settings = get_settings_override()
+    p: Path = Path(s.upload_tmp_files_folder)
+    assert p.is_dir()
+    count_files: int = len([_ for _ in p.iterdir()])
+    assert count_files == 0
