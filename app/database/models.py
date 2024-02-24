@@ -3,7 +3,13 @@ from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, computed_field
 from fit_galgo.fit.models import (
-    Activity as FitActivity,
+    FileId as FitFileId,
+    Session as FitSession,
+    Workout as FitWorkout,
+    WorkoutStep as FitWorkoutStep,
+    Split as FitSplit,
+    Set as FitSet,
+    Lap as FitLap,
     MultiActivity as FitMultiActivity,
     Sleep as FitSleep,
     Hrv as FitHrv
@@ -30,8 +36,23 @@ class UserDb(User):
         return UserDb(**user_dict)
 
 
-class Activity(FitActivity):
+class Activity(BaseModel):
+    _id: str
     username: str
+    fit_file_path: str
+    file_id: FitFileId
+    zone_info: str
+    session: FitSession
+    workout: FitWorkout | None = None
+    workout_steps: list[FitWorkoutStep] = []
+
+
+class SplitsActivity(Activity):
+    splits: list[FitSplit] | None = None
+
+
+class SetsActivity(Activity):
+    sets: list[FitSet] | None = None
 
 
 class MultiActivity(FitMultiActivity):
@@ -39,7 +60,7 @@ class MultiActivity(FitMultiActivity):
 
 
 class ActivityOut(BaseModel):
-    data: list[Activity | MultiActivity]
+    data: list[Activity | SetsActivity | SplitsActivity | MultiActivity]
 
     @computed_field
     @property

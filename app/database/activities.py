@@ -1,7 +1,7 @@
 from pymongo.cursor import Cursor
 
 from app.database.database import DbManager
-from app.database.models import Activity, MultiActivity, User
+from app.database.models import Activity, SetsActivity, SplitsActivity, MultiActivity, User
 from app.config import Settings
 
 
@@ -21,7 +21,15 @@ class ActivitiesManager(DbManager):
         activities: Cursor = self._client.activity.find(filter).sort(
             "session.timestamp", 1
         )
-        return [
-            Activity(**activity) if "session" in activity else MultiActivity(**activity)
-            for activity in activities if "session" in activity or "sessions" in activity
-        ]
+
+        result: list[Activity | MultiActivity] = []
+        for activity in activities:
+            if "sessions" in activity:
+                result.append(MultiActivity(**activity))
+            elif "sets" in activity and "session" in activity:
+                result.append(SetsActivity(**activity))
+            elif "splits" in activity and "session" in activity:
+                result.append(SplitsActivity(**activity))
+            else:
+                result.append(Activity(**activity))
+        return result
