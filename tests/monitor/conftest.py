@@ -10,6 +10,7 @@ from fit_galgo.fit.models import (
     Monitor
 )
 
+from app.database.files import COLLECTION_NAME
 from app.main import app
 from app.routers.jwt_auth import get_settings
 from app.config import Settings
@@ -146,3 +147,10 @@ def testclient() -> TestClient:
     fm2.drop("monitoring")
     fm3.drop("monitoring")
     users_manager.drop()
+
+    u = User(username="alice")
+    u2 = User(username="bob")
+    for collection_name in set(COLLECTION_NAME.values()):
+        FilesManager(get_settings_override(), u).drop(collection_name)
+        FilesManager(get_settings_override(), u2).drop(collection_name)
+    UserManager(get_settings_override()).drop()

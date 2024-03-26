@@ -2,6 +2,9 @@ import pytest
 
 from fastapi.testclient import TestClient
 
+from app.database.files import COLLECTION_NAME
+from app.database.models import User
+from app.database.files import FilesManager
 from app.main import app
 from app.database.users import UserManager
 from app.database.models import UserIn
@@ -25,6 +28,11 @@ def db_test() -> UserManager:
     users_manager: UserManager = UserManager(get_settings_override())
     yield users_manager
     users_manager.drop()
+
+    u = User(username="alice")
+    for collection_name in set(COLLECTION_NAME.values()):
+        FilesManager(get_settings_override(), u).drop(collection_name)
+    UserManager(get_settings_override()).drop()
 
 
 @pytest.fixture(scope="function")

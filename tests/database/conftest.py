@@ -2,6 +2,7 @@ import pytest
 
 from app.config import Settings
 from app.database.files import FilesManager
+from app.database.users import UserManager
 from app.database.files import COLLECTION_NAME
 from app.database.models import User
 
@@ -22,3 +23,4 @@ def db_manager() -> Settings:
 
     for collection_name in set(COLLECTION_NAME.values()):
         FilesManager(get_settings_override(), user).drop(collection_name)
+    UserManager(get_settings_override()).drop()

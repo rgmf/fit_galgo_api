@@ -86,22 +86,31 @@ async def send_task_files(
 
         # Depends on the type of file...
         if is_accepted_file(tmp_file_path):
-            fui: FileUploadInfo = await process_fit_file(
-                fit_file_path=tmp_file_path,
-                zone=zone,
-                user=user,
-                settings=settings
-            )
-            fut.data.append(fui)
             # Move tmp file to the destination folder
             dst_path: str = os.path.join(
                 settings.upload_fit_files_folder,
                 datetime.now().date().strftime("%Y%m%d")
             )
             Path(dst_path).mkdir(parents=True, exist_ok=True)
-            Path(tmp_file_path).rename(Path(os.path.join(dst_path, file.filename)))
+            dst_file_path = Path(tmp_file_path).rename(Path(os.path.join(dst_path, file.filename)))
+            # Process file
+            fui: FileUploadInfo = await process_fit_file(
+                fit_file_path=dst_file_path.as_posix(),
+                zone=zone,
+                user=user,
+                settings=settings
+            )
+            fut.data.append(fui)
         elif is_zip_file(tmp_file_path):
-            with ZipFile(tmp_file_path) as zipfile:
+            # Move tmp file to the destination folder
+            dst_zip_path: str = os.path.join(
+                settings.upload_zip_files_folder,
+                datetime.now().date().strftime("%Y%m%d")
+            )
+            Path(dst_zip_path).mkdir(parents=True, exist_ok=True)
+            dst_zipfile_path = Path(tmp_file_path).rename(Path(os.path.join(dst_zip_path, file.filename)))
+            # Process zip file
+            with ZipFile(dst_zipfile_path.as_posix()) as zipfile:
                 for filename in [f for f in zipfile.namelist() if is_accepted_file(f)]:
                     with zipfile.open(filename) as file_in_zip:
                         tmp_fit_file_path: str = os.path.join(
@@ -113,22 +122,22 @@ async def send_task_files(
                                 fo.write(chunk)
                                 chunk: bytes = file_in_zip.read(10_000)
 
+                        # Move tmp file to the destination folder
+                        dst_path: str = os.path.join(
+                            settings.upload_fit_files_folder,
+                            datetime.now().date().strftime("%Y%m%d")
+                        )
+                        Path(dst_path).mkdir(parents=True, exist_ok=True)
+                        dst_file_path = Path(tmp_fit_file_path).rename(Path(os.path.join(dst_path, filename)))
+                        # Process file
                         fui: FileUploadInfo = await process_fit_file(
-                            fit_file_path=tmp_fit_file_path,
-                            zip_file_path=tmp_file_path,
+                            fit_file_path=dst_file_path.as_posix(),
+                            zip_file_path=dst_zipfile_path,
                             zone=zone,
                             user=user,
                             settings=settings
                         )
                         fut.data.append(fui)
-                        Path(tmp_fit_file_path).unlink()
-            # Move tmp file to the destination folder
-            dst_path: str = os.path.join(
-                settings.upload_zip_files_folder,
-                datetime.now().date().strftime("%Y%m%d")
-            )
-            Path(dst_path).mkdir(parents=True, exist_ok=True)
-            Path(tmp_file_path).rename(Path(os.path.join(dst_path, file.filename)))
         else:
             fui: FileUploadInfo = FileUploadInfo(
                 filename=file.filename,

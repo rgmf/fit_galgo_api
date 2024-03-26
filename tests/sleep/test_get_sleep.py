@@ -8,7 +8,7 @@ def test_read_sleep(testclient):
     assert response.json()["count"] == 11
 
 
-def test_read_sleep_from_date(testclient):
+def test_read_sleep_from_date1(testclient):
     today_date: datetime = datetime.now()
     from_date: datetime = datetime(
         today_date.year, today_date.month, today_date.day,

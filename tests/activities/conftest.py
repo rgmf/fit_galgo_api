@@ -2,6 +2,7 @@ import pytest
 
 from datetime import datetime, timedelta
 
+from app.database.files import COLLECTION_NAME
 from fastapi.testclient import TestClient
 from fit_galgo.fit.models import (
     FileId,
@@ -53,6 +54,7 @@ def add_activities_to_db_for_user(count: int, user: User) -> FilesManager:
         activity: Activity = Activity(
             fit_file_path="file_path.fit",
             file_id=file_id,
+            zone_info="Europe/Madrid",
             session=session
         )
 
@@ -91,3 +93,8 @@ def testclient() -> TestClient:
     fm1.drop("activity")
     fm2.drop("activity")
     users_manager.drop()
+
+    u = User(username="alice")
+    for collection_name in set(COLLECTION_NAME.values()):
+        FilesManager(get_settings_override(), u).drop(collection_name)
+    UserManager(get_settings_override()).drop()

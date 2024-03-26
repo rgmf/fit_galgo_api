@@ -56,9 +56,9 @@ async def read_sleep(
     db_manager: SleepManager = SleepManager(settings, user)
 
     if from_date:
-        query_builder.from_date(from_date, True)
+        query_builder.from_date(from_date)
     if to_date:
-        query_builder.to_date(to_date, True)
+        query_builder.to_date(to_date)
 
     db_manager.add_query_builder(query_builder)
 
