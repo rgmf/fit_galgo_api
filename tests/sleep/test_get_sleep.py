@@ -8,7 +8,7 @@ def test_read_sleep(testclient):
     assert response.json()["count"] == 11
 
 
-def test_read_sleep_from_date1(testclient):
+def test_read_sleep_from_date(testclient):
     today_date: datetime = datetime.now()
     from_date: datetime = datetime(
         today_date.year, today_date.month, today_date.day,
@@ -30,8 +30,8 @@ def test_read_sleep_to_date(testclient):
 
     response = testclient.get(f"/monitorings/sleep/?to_date={to_date}")
     assert response.status_code == 200
-    assert len(response.json()["data"]) == 9
-    assert response.json()["count"] == 9
+    assert len(response.json()["data"]) == 8
+    assert response.json()["count"] == 8
 
 
 def test_read_sleep_from_date_to_date(testclient):
@@ -78,7 +78,7 @@ def test_read_sleep_two_dates_from_date_out(testclient):
 
 
 def test_read_sleep_two_dates_to_date_1(testclient):
-    to_date: datetime = datetime(2010, 10, 10, 0, 0, 0)
+    to_date: datetime = datetime(2010, 10, 10, 23, 59, 59)
     response = testclient.get(f"/monitorings/sleep/?to_date={to_date}")
     assert response.status_code == 200
     assert len(response.json()["data"]) == 1
@@ -114,7 +114,7 @@ def test_read_sleep_two_dates_from_and_to_date_out_below(testclient):
 
 def test_read_sleep_two_dates_from_and_to_date_in_below(testclient):
     from_date: datetime = datetime(2010, 10, 9, 0, 0, 0)
-    to_date: datetime = datetime(2010, 10, 10, 0, 0, 0)
+    to_date: datetime = datetime(2010, 10, 10, 23, 59, 59)
     response = testclient.get(
         f"/monitorings/sleep/?from_date={from_date}&to_date={to_date}"
     )
