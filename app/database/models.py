@@ -37,7 +37,7 @@ class UserDb(User):
 
 
 class Activity(BaseModel):
-    _id: str
+    id: str
     username: str
     fit_file_path: str
     file_id: FitFileId
@@ -61,6 +61,15 @@ class MultiActivity(FitMultiActivity):
 
 class ActivityOut(BaseModel):
     data: list[Activity | SetsActivity | SplitsActivity | MultiActivity]
+
+    @computed_field
+    @property
+    def count(self) -> int:
+        return len(self.data)
+
+
+class LapOut(BaseModel):
+    data: list[FitLap]
 
     @computed_field
     @property

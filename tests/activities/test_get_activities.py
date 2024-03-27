@@ -1,11 +1,22 @@
 from datetime import datetime, timedelta
 
 
+def assert_needed_activity_data(ld: list[dict]):
+    for d in ld:
+        assert "id" in d
+        assert "username" in d
+        assert "fit_file_path" in d
+        assert "file_id" in d
+        assert "zone_info" in d
+        assert "session" in d
+
+
 def test_read_activities(testclient):
     response = testclient.get("/activities")
     assert response.status_code == 200
     assert len(response.json()["data"]) == 10
     assert response.json()["count"] == 10
+    assert_needed_activity_data(response.json()["data"])
 
 
 def test_read_activities_from_date(testclient):
@@ -19,6 +30,7 @@ def test_read_activities_from_date(testclient):
     assert response.status_code == 200
     assert len(response.json()["data"]) == 3
     assert response.json()["count"] == 3
+    assert_needed_activity_data(response.json()["data"])
 
 
 def test_read_activities_to_date(testclient):
@@ -32,6 +44,7 @@ def test_read_activities_to_date(testclient):
     assert response.status_code == 200
     assert len(response.json()["data"]) == 7
     assert response.json()["count"] == 7
+    assert_needed_activity_data(response.json()["data"])
 
 
 def test_read_activities_from_date_to_date(testclient):
@@ -49,3 +62,4 @@ def test_read_activities_from_date_to_date(testclient):
     assert response.status_code == 200
     assert len(response.json()["data"]) == 2
     assert response.json()["count"] == 2
+    assert_needed_activity_data(response.json()["data"])

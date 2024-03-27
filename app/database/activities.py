@@ -22,8 +22,12 @@ class ActivitiesManager(DbManager):
             "session.timestamp", 1
         )
 
-        result: list[Activity | MultiActivity] = []
+        result: list[Activity | MultiActivity | SetsActivity | SplitsActivity] = []
         for activity in activities:
+            if "_id" in activity:
+                activity["id"] = activity["_id"]
+                del activity["_id"]
+
             if "sessions" in activity:
                 result.append(MultiActivity(**activity))
             elif "sets" in activity and "session" in activity:
@@ -32,4 +36,5 @@ class ActivitiesManager(DbManager):
                 result.append(SplitsActivity(**activity))
             else:
                 result.append(Activity(**activity))
+
         return result
