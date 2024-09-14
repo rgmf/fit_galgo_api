@@ -11,8 +11,7 @@ from app.database.models import User, UserDb
 from app.database.users import UserManager
 from app.config import Settings, get_settings
 
-# Result of: openssl rand -hex 32
-SECRET_KEY = "020f2660714548e17276340ccf9b627e6849bbe7997c8b7a88fbc618f73eb629"
+SECRET_KEY = get_settings().secret_key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MIN = 60
 

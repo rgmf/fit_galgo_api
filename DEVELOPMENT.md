@@ -2,19 +2,25 @@
 For instance, if you change dependencies in `fit_galgo_api` then you have tu run these commands to re-build the container:
 
 ```shell
-$ docker compose up -d --build fit_galgo_api
+$ docker compose -f docker-compose-dev.yml up -d --build fit_galgo_api
 
-$ docker compose stop fit_galgo_api
-$ docker compose rm -f fit_galgo_api
+$ docker compose -f docker-compose-dev.yml stop fit_galgo_api
+$ docker compose -f docker-compose-dev.yml rm -f fit_galgo_api
 
-$ docker compose up -d fit_galgo_api
+$ docker compose -f docker-compose-dev.yml up -d fit_galgo_api
+```
+
+In an only command line:
+
+```shell
+$ docker compose -f docker-compose-dev.yml up -d --build fit_galgo_api && docker compose -f docker-compose-dev.yml stop fit_galgo_api && docker compose -f docker-compose-dev.yml rm -f fit_galgo_api && docker compose -f docker-compose-dev.yml up -d fit_galgo_api && docker compose -f docker-compose-dev.yml up -d
 ```
 
 # Run tests
-`docker compose exec fit_galgo_api pytest`
+`docker compose -f docker-compose-dev.yml exec fit_galgo_api pytest`
 
 # See logs
-`docker compose logs fit_galgo_api --follow`
+`docker compose -f docker-compose-dev.yml logs fit_galgo_api --follow`
 
 # Mongosh in mongodb
 `docker compose exec -it fit_galgo_mongodb mongosh`
@@ -44,4 +50,4 @@ get_password_hash("<the plain password you want to hashed>")
 ```
 
 # Mongosh in mongodb test
-`docker compose exec -it fit_galgo_mongodb_test mongosh`
+`docker compose -f docker-compose-dev.yml exec -it fit_galgo_mongodb_test mongosh`

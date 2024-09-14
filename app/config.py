@@ -1,17 +1,22 @@
+import os
+
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    mongodb_host: str = "fit_galgo_mongodb"
-    mongodb_port: int = 27017
+    mongodb_host: str
+    mongodb_port: int
 
-    upload_files_folder: str = "files"
-    upload_fit_files_folder: str = "files/fit"
-    upload_zip_files_folder: str = "files/zip"
-    upload_tmp_files_folder: str = "files/tmp"
+    upload_files_folder: str
+    upload_fit_files_folder: str
+    upload_zip_files_folder: str
+    upload_tmp_files_folder: str
 
+    secret_key: str
+
+    #model_config = SettingsConfigDict(env_file=os.path.join(os.path.dirname(__file__), '..', '.env'))
     model_config = SettingsConfigDict(env_file=".env")
 
 

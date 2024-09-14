@@ -1,0 +1,58 @@
+version: "3.8"
+
+services:
+  fit_galgo_api:
+    build:
+      context: .
+      dockerfile: ./docker/fastapi/Dockerfile
+    container_name: fit_galgo_api
+    labels:
+      # Habilitar Traefik para este servicio llamado "fit_galgo_api"
+      - traefik.enable=true
+      # Definir el puerto dentro del servicio de Docker a utilizar
+      - traefik.http.services.fitapi.loadbalancer.server.port=80
+      # Hacer que Traefik utilice este dominio en HTTP (en Traefik se ha definido el entrypoint "http")
+      - traefik.http.routers.fitapi_http.entrypoints=http
+      - traefik.http.routers.fitapi_http.rule=Host(`fitapi.rgmf.es`)
+      # Usar la red públic "traefik_public" (declarada debajo)
+      - traefik.docker.network=traefik_public
+      # Hacer que Traefik use este dominio en HTTPS
+      - traefik.http.routers.fitapi_https.entrypoints=https
+      - traefik.http.routers.fitapi_https.rule=Host(`fitapi.rgmf.es`)
+      - traefik.http.routers.fitapi_https.tls=true
+      # Usar el resolver crado en Traefik llamado "le" (Let's Encrypt)
+      - traefik.http.routers.fitapi_https.tls.certresolver=le
+      # Middleware "fitapi_https_redirect" para redirigir tráfico HTTP a HTTPS
+      - traefik.http.middlewares.fitapi_https_redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.fitapi_https_redirect.redirectscheme.permanent=true
+      # Middleware para redirigir HTTP (router "fitapi_http" creado arriba) a HTTPS (recién creado fitapi_https_redirect de arriba)
+      - traefik.http.routers.fitapi_http.middlewares=fitapi_https_redirect
+    networks:
+      - traefik_public
+      - fit_galgo_network
+    volumes:
+      - ./app:/app/app
+      - ./tests:/app/tests
+    env_file:
+      - ./app/.env
+    depends_on:
+      - fit_galgo_mongodb
+
+  fit_galgo_mongodb:
+    image: mongo:latest
+    ports:
+      - "27117:27017"
+    networks:
+      - fit_galgo_network
+    volumes:
+      - mongodb_data:/data/db
+
+networks:
+  traefik_public:
+    external: true
+  fit_galgo_network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  mongodb_test_data:

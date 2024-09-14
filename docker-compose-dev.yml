@@ -12,8 +12,8 @@ services:
     volumes:
       - ./app:/app/app
       - ./tests:/app/tests
-    environment:
-      - MONGO_HOST=fit_galgo_mongodb
+    env_file:
+      - ./app/.env
     depends_on:
       - fit_galgo_mongodb
 
