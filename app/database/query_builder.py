@@ -5,6 +5,9 @@ class QueryBuilder:
     def __init__(self):
         self._query_dict: dict[str, dict] = {}
 
+    def eq(self, field: str, value: str):
+        self._query_dict[field] = value
+
     def from_date(self, value: datetime, without_time: bool = False):
         final_value: any = value
         if without_time:

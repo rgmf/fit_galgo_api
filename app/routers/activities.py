@@ -4,7 +4,8 @@ from datetime import datetime
 from fastapi import APIRouter, status, Depends, Query
 
 from app.database.activities import ActivitiesManager
-from app.database.models import ActivityOut, User
+from app.database.laps import LapsManager
+from app.database.models import ActivityOut, LapOut, User
 from app.database.query_builder import QueryBuilder
 from app.config import Settings, get_settings
 from app.auth.auth import get_auth_user
@@ -37,3 +38,18 @@ async def read_activities(
     db_manager.add_query_builder(query_builder)
 
     return ActivityOut(data=db_manager.get())
+
+
+@router.get("/{id}/laps/", response_model=LapOut, status_code=status.HTTP_200_OK)
+async def read_laps_activity(
+        id: str,
+        settings: Annotated[Settings, Depends(get_settings)],
+        user: Annotated[User, Depends(get_auth_user)]
+) -> LapOut:
+    query_builder: QueryBuilder = QueryBuilder()
+    db_manager: ActivitiesManager = LapsManager(settings, user)
+
+    query_builder.eq("activity_id", id)
+    db_manager.add_query_builder(query_builder)
+
+    return LapOut(data=db_manager.get())

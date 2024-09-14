@@ -27,5 +27,21 @@ In `mongosh` you can see all files documents, for instance, executing: `db.files
 
 In `mongosh` you can delete all files documents, for instance, executing: `db.files.deleteMany({})`.
 
+## Add a new user from mongosh
+Once inside mongosh:
+
+1.- `use fitgalgodb` to create the database and active it.
+2.- `db` to see what database is activated (it should be *fitgalgodb*)
+3.- `db.users.insertOne({username: "<username>", full_name: "<full name>", email: "<email>", password: "<hashed password>", disabled: <true or false>, })` to create a new user.
+
+You can use `get_password_hash` function from `app.auth.auth` to generate a hashed password. From *ipython* o *python REPL*:
+
+```python
+from app.auth.auth import get_password_hash
+
+
+get_password_hash("<the plain password you want to hashed>")
+```
+
 # Mongosh in mongodb test
 `docker compose exec -it fit_galgo_mongodb_test mongosh`

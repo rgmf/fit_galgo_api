@@ -27,6 +27,10 @@ class UserIn(User):
     password: str
 
 
+class UserOut(BaseModel):
+    data: User
+
+
 class UserDb(User):
     hashed_password: str
 
@@ -66,6 +70,10 @@ class ActivityOut(BaseModel):
     @property
     def count(self) -> int:
         return len(self.data)
+
+
+class Lap(FitLap):
+    pass
 
 
 class LapOut(BaseModel):
