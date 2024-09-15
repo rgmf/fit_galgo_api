@@ -17,7 +17,7 @@ router = APIRouter(
 )
 
 
-@router.get("/steps", response_model=MonitorOut, status_code=status.HTTP_200_OK)
+@router.get("/steps/", response_model=MonitorOut, status_code=status.HTTP_200_OK)
 async def read_steps(
         settings: Annotated[Settings, Depends(get_settings)],
         user: Annotated[User, Depends(get_auth_user)],
@@ -41,7 +41,7 @@ async def read_steps(
     return MonitorOut(data=db_manager.get_monitor_with_steps())
 
 
-@router.get("/sleep", response_model=SleepOut, status_code=status.HTTP_200_OK)
+@router.get("/sleep/", response_model=SleepOut, status_code=status.HTTP_200_OK)
 async def read_sleep(
         settings: Annotated[Settings, Depends(get_settings)],
         user: Annotated[User, Depends(get_auth_user)],
@@ -65,7 +65,7 @@ async def read_sleep(
     return SleepOut(data=db_manager.get())
 
 
-@router.get("/hrv", response_model=HrvOut, status_code=status.HTTP_200_OK)
+@router.get("/hrv/", response_model=HrvOut, status_code=status.HTTP_200_OK)
 async def read_hrv(
         settings: Annotated[Settings, Depends(get_settings)],
         user: Annotated[User, Depends(get_auth_user)],

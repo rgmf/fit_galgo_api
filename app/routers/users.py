@@ -11,6 +11,6 @@ router = APIRouter(
 )
 
 
-@router.get("/me", response_model=UserOut, status_code=status.HTTP_200_OK)
+@router.get("/me/", response_model=UserOut, status_code=status.HTTP_200_OK)
 async def read_users_me(current_user: Annotated[User, Depends(get_auth_user)]):
     return UserOut(data=current_user)

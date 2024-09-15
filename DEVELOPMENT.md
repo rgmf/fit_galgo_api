@@ -23,7 +23,7 @@ $ docker compose -f docker-compose-dev.yml up -d --build fit_galgo_api && docker
 `docker compose -f docker-compose-dev.yml logs fit_galgo_api --follow`
 
 # Mongosh in mongodb
-`docker compose exec -it fit_galgo_mongodb mongosh`
+`docker compose -f docker-compose-dev.yml exec -it fit_galgo_mongodb mongosh`
 
 In `mongosh` you can see all databases executing `show databases`.
 

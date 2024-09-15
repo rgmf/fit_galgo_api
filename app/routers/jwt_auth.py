@@ -25,7 +25,7 @@ def authenticate_user(user_db: UserDb, password: str) -> User | None:
     return User(**dict(user_db))
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login/", response_model=Token)
 async def login_for_access_token(
         settings: Annotated[Settings, Depends(get_settings)],
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
