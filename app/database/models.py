@@ -12,7 +12,8 @@ from fit_galgo.fit.models import (
     Lap as FitLap,
     MultiActivity as FitMultiActivity,
     Sleep as FitSleep,
-    Hrv as FitHrv
+    Hrv as FitHrv,
+    TimeStat as FitTimeStat
 )
 
 
@@ -46,6 +47,7 @@ class Activity(BaseModel):
     fit_file_path: str
     file_id: FitFileId
     zone_info: str
+    time: FitTimeStat
     session: FitSession
     workout: FitWorkout | None = None
     workout_steps: list[FitWorkoutStep] = []
