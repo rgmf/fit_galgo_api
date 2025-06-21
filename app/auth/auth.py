@@ -13,7 +13,7 @@ from app.config import Settings, get_settings
 
 SECRET_KEY = get_settings().secret_key
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MIN = 60
+ACCESS_TOKEN_EXPIRE_MIN = 7 * 24 * 60
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
